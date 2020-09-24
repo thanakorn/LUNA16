@@ -28,9 +28,10 @@ def save_CT_images(ct_filename):
     for s in range(ct_img.get_num_slice()):
         img_filename = f'{seriesuid}-{s}.jpeg'
         xml_filename = f'{seriesuid}-{s}.xml'
+        full_filename = f'{output_path}/{image_folder}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
-        cv.imwrite(f'{output_path}/{image_folder}/{img_filename}', img)
-        annotation = Annotation(image_folder, img_filename, output_path, database, ct_img.get_img_size())
+        cv.imwrite(full_filename, img)
+        annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
         voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
         
 def annotate_image(filename, xy_min, xy_max):
@@ -42,7 +43,6 @@ def process_CT_image(filename, nodule_data, log=None):
     voc_writer = VOCWriter()
     seriesuid = filename.split('/')[-1][:-4]
     ct_img = CTImage(filename)
-    annotation = Annotation(image_folder, filename, output_path, database, ct_img.get_img_size())
     nodules = {}
     
     # Group nodules by slice
@@ -57,13 +57,16 @@ def process_CT_image(filename, nodule_data, log=None):
 
     # Annotate image and Update VOC
     for slice_idx, nodules in nodules.items():
-        img_file = f'{output_path}/{image_folder}/{seriesuid}-{slice_idx}.jpeg'
+        img_filename = f'{seriesuid}-{slice_idx}.jpeg'
+        xml_filename = f'{seriesuid}-{slice_idx}.xml'
+        full_filename = f'{output_path}/{image_folder}/{seriesuid}-{slice_idx}.jpeg'
+        annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
         for nodule in nodules:
             x, y, dx, dy = nodule
-            annotate_image(img_file, (x - dx, y - dy), (x + dx, y + dy))
+            annotate_image(full_filename, (x - dx, y - dy), (x + dx, y + dy))
             obj = Object(name, (x - dx, y - dy), (x + dx, y + dy))
             annotation.add_object(obj)
-        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{seriesuid}-{slice_idx}.xml')
+        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
         if log : log.write(f'{seriesuid},{slice_idx}\n')
 
 if __name__=='__main__':
