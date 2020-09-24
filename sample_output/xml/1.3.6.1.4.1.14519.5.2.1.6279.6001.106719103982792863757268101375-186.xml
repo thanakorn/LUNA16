@@ -1,0 +1,25 @@
+<annotation>
+    <folder>images</folder>
+    <filename>1.3.6.1.4.1.14519.5.2.1.6279.6001.106719103982792863757268101375.mhd</filename>
+    <path>./output</path>
+    <source>
+        <database>LIDC-IDRI</database>
+    </source>
+    <size>
+        <width>512</width>
+        <height>512</height>
+        <depth>1</depth>
+    </size>
+    <segmented />
+<object>
+    <name>nodule</name>
+    <pose>Unspecified</pose>
+    <truncated>0</truncated>
+    <difficult>0</difficult>
+    <bndbox>
+        <xmin>124</xmin>
+        <ymin>273</ymin>
+        <xmax>160</xmax>
+        <ymax>309</ymax>
+    </bndbox>
+</object></annotation>
