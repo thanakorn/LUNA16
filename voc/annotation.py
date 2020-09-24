@@ -4,7 +4,7 @@ class Annotation:
         self.filename = filename
         self.path = path
         self.database = database
-        self.size = size
+        self.width, self.height, self.depth = size
         self.segmented = segmented
         self.objects = []
         
@@ -19,9 +19,3 @@ class Object:
         self.xmin, self.ymin = xy_min
         self.xmax, self.ymax = xy_max
         self.difficult = difficult
-        
-class Size:
-    def __init__(self, width, height, depth):
-        self.width = width
-        self.height = height
-        self.depth = depth
