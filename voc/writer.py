@@ -12,9 +12,9 @@ class VOCWriter:
         output.find('filename').text = annotation.filename
         output.find('path').text = annotation.path
         output.find('source').find('database').text = annotation.database
-        output.find('size').find('width').text = str(annotation.size.width)
-        output.find('size').find('height').text = str(annotation.size.height)
-        output.find('size').find('depth').text = str(annotation.size.depth)
+        output.find('size').find('width').text = str(annotation.width)
+        output.find('size').find('height').text = str(annotation.height)
+        output.find('size').find('depth').text = str(annotation.depth)
         
         for obj in annotation.objects:
             obj_output = deepcopy(self.object_template).getroot()
