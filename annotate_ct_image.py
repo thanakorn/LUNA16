@@ -36,7 +36,6 @@ if __name__=='__main__':
     
     for i in range(num_subset):
         print(f'Processing Subset {i}')
-        
         input_files = list(filter(lambda filename: filename.endswith('.mhd'), os.listdir(f'./data/subset{i}')))
 
         for filename in input_files:
@@ -50,6 +49,7 @@ if __name__=='__main__':
             
             nodules = nodule_data[nodule_data['seriesuid'] == seriesuid]
             nodules_info = {}
+            
             # Group nodules by slice
             for idx in nodules.index:
                 coord_x, coord_y, coord_z = nodules.loc[idx, 'coordX'], nodules.loc[idx, 'coordY'], nodules.loc[idx, 'coordZ']
