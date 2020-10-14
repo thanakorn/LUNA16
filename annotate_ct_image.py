@@ -19,7 +19,7 @@ image_folder = 'images'
 xml_folder = 'xml'
 database = 'LIDC-IDRI'
 name = 'nodule'
-nodules_log = './output/nodules_log.csv'
+nodules_log = 'nodules_log.csv'
 
 def save_CT_images(ct_filename):
     voc_writer = VOCWriter()
@@ -28,11 +28,11 @@ def save_CT_images(ct_filename):
     for s in range(ct_img.get_num_slice()):
         img_filename = f'{seriesuid}-{s}.jpeg'
         xml_filename = f'{seriesuid}-{s}.xml'
-        full_filename = f'{output_path}/{image_folder}/{img_filename}'
+        full_filename = f'{output_path}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
         cv.imwrite(full_filename, img)
-        annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
-        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
+        annotation = Annotation(os.path.basename(args.output), img_filename, full_filename, database, ct_img.get_img_size())
+        voc_writer.write(annotation, f'{output_path}/{xml_filename}')
         
 def annotate_image(filename, xy_min, xy_max):
     img = cv.imread(filename)
@@ -82,10 +82,7 @@ if __name__=='__main__':
     annotation = pd.read_csv(f'{data_path}/annotations.csv')
     nodules_log = open(nodules_log, 'w')
     nodules_log.write('seriesuid,slice\n')
-    
-    if not os.path.exists(f'{output_path}/{image_folder}'): os.mkdir(f'{output_path}/{image_folder}')
-    if not os.path.exists(f'{output_path}/{xml_folder}'): os.mkdir(f'{output_path}/{xml_folder}')
-    
+
     for i in range(num_subset):
         print(f'Processing subset{i}')
         input_files = list(filter(lambda filename: filename.endswith('.mhd'), os.listdir(f'{data_path}/subset{i}')))
