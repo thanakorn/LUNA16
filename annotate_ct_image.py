@@ -59,14 +59,14 @@ def process_CT_image(filename, nodule_data, log=None):
     for slice_idx, nodules in nodules.items():
         img_filename = f'{seriesuid}-{slice_idx}.jpeg'
         xml_filename = f'{seriesuid}-{slice_idx}.xml'
-        full_filename = f'{output_path}/{image_folder}/{seriesuid}-{slice_idx}.jpeg'
+        full_filename = f'{output_path}/{seriesuid}-{slice_idx}.jpeg'
         annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
         for nodule in nodules:
             x, y, dx, dy = nodule
-            annotate_image(full_filename, (x - dx, y - dy), (x + dx, y + dy))
+            #annotate_image(full_filename, (x - dx, y - dy), (x + dx, y + dy))
             obj = Object(name, (x - dx, y - dy), (x + dx, y + dy))
             annotation.add_object(obj)
-        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
+        voc_writer.write(annotation, f'{output_path}/{xml_filename}')
         if log : log.write(f'{seriesuid},{slice_idx}\n')
 
 if __name__=='__main__':
