@@ -17,17 +17,3 @@ do
   cd data
   rm -rf subset$i
 done
-
-for i in 7 8 9
-do
-  echo 'Downloading subset$i'
-  wget https://zenodo.org/record/3723299/files/subset$i.zip
-  7z x subset$i.zip
-  rm subset$i.zip
-  cd ..
-  python preprocess_yolo.py --classes=./classes.names --data=./data --output=../luna_train --num_processes=4
-  cd data
-  rm -rf subset$i
-done
-
-
