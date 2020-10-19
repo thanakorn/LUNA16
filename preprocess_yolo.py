@@ -10,6 +10,7 @@ from writer.coco_writer import COCOWriter
 from concurrent.futures import ThreadPoolExecutor
 
 image_folder = 'images'
+image_list = 'images.txt'
 label_folder = 'labels'
 database = 'LIDC-IDRI'
 name = 'nodule'
@@ -29,6 +30,7 @@ num_processes = int(args.num_processes)
 classes = open(args.classes, 'r').read().split('\n')
 
 def save_CT_images(ct_filename):
+    file = open(f'{args.output}/images.txt', 'w+')
     seriesuid = ct_filename.split('/')[-1][:-4]
     ct_img = CTImage(ct_filename)
     for s in range(ct_img.get_num_slice()):
@@ -36,6 +38,7 @@ def save_CT_images(ct_filename):
         full_filename = f'{output_path}/{image_folder}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
         cv.imwrite(full_filename, img)
+        file.write(os.path.abspath(args.output) + '/' + image_folder + '/' + img_filename + '\n')
 
 def annotate_image(filename, xy_min, xy_max):
     img = cv.imread(filename)
