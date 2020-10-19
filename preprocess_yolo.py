@@ -36,8 +36,7 @@ def save_CT_images(ct_filename):
         full_filename = f'{output_path}/{image_folder}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
         cv.imwrite(full_filename, img)
-        annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
-        
+
 def annotate_image(filename, xy_min, xy_max):
     img = cv.imread(filename)
     cv.rectangle(img, xy_min, xy_max, (0,0,255))
