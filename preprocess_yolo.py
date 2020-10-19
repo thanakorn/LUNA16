@@ -30,7 +30,7 @@ num_processes = int(args.num_processes)
 classes = open(args.classes, 'r').read().split('\n')
 
 def save_CT_images(ct_filename):
-    file = open(f'{args.output}/images.txt', 'w+')
+    file = open(f'{args.output}/images.txt', 'a')
     seriesuid = ct_filename.split('/')[-1][:-4]
     ct_img = CTImage(ct_filename)
     for s in range(ct_img.get_num_slice()):
