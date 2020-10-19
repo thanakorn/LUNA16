@@ -5,34 +5,38 @@ import concurrent.futures
 import argparse
 from tqdm import tqdm
 from models.ct_image import CTImage
-from voc.annotation import Annotation, Object
-from voc.writer import VOCWriter
+from writer.annotation import Annotation, Object
+from writer.coco_writer import COCOWriter
 from concurrent.futures import ThreadPoolExecutor
 
+image_folder = 'images'
+label_folder = 'labels'
+database = 'LIDC-IDRI'
+name = 'nodule'
+nodules_log = './nodules_log.csv'
+
 argument_parser = argparse.ArgumentParser()
+argument_parser.add_argument('--classes')
 argument_parser.add_argument('--data')
 argument_parser.add_argument('--output')
 argument_parser.add_argument('--num_processes')
-argument_parser.add_argument('--num_subset')
 
-image_folder = 'images'
-xml_folder = 'xml'
-database = 'LIDC-IDRI'
-name = 'nodule'
-nodules_log = './output/nodules_log.csv'
+args = argument_parser.parse_args()
+data_path = args.data
+output_path = args.output
+num_processes = int(args.num_processes)
+
+classes = open(args.classes, 'r').read().split('\n')
 
 def save_CT_images(ct_filename):
-    voc_writer = VOCWriter()
     seriesuid = ct_filename.split('/')[-1][:-4]
     ct_img = CTImage(ct_filename)
     for s in range(ct_img.get_num_slice()):
         img_filename = f'{seriesuid}-{s}.jpeg'
-        xml_filename = f'{seriesuid}-{s}.xml'
         full_filename = f'{output_path}/{image_folder}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
         cv.imwrite(full_filename, img)
         annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
-        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
         
 def annotate_image(filename, xy_min, xy_max):
     img = cv.imread(filename)
@@ -40,7 +44,7 @@ def annotate_image(filename, xy_min, xy_max):
     cv.imwrite(filename, img)
     
 def process_CT_image(filename, nodule_data, log=None):
-    voc_writer = VOCWriter()
+    writer = COCOWriter()
     seriesuid = filename.split('/')[-1][:-4]
     ct_img = CTImage(filename)
     nodules = {}
@@ -55,41 +59,36 @@ def process_CT_image(filename, nodule_data, log=None):
         if z not in nodules: nodules[z] = []
         nodules[z].append((x, y, dx, dy))
 
-    # Annotate image and Update VOC
+    # Annotate image and create label file
     for slice_idx, nodules in nodules.items():
         img_filename = f'{seriesuid}-{slice_idx}.jpeg'
-        xml_filename = f'{seriesuid}-{slice_idx}.xml'
+        label_filename = f'{seriesuid}-{slice_idx}.txt'
         full_filename = f'{output_path}/{image_folder}/{seriesuid}-{slice_idx}.jpeg'
         annotation = Annotation(image_folder, img_filename, full_filename, database, ct_img.get_img_size())
         for nodule in nodules:
             x, y, dx, dy = nodule
-            annotate_image(full_filename, (x - dx, y - dy), (x + dx, y + dy))
+            # annotate_image(full_filename, (x - dx, y - dy), (x + dx, y + dy))
             obj = Object(name, (x - dx, y - dy), (x + dx, y + dy))
             annotation.add_object(obj)
-        voc_writer.write(annotation, f'{output_path}/{xml_folder}/{xml_filename}')
+        writer.write(annotation, f'{output_path}/{label_folder}/{label_filename}', classes)
         if log : log.write(f'{seriesuid},{slice_idx}\n')
 
 if __name__=='__main__':
-    
-    args = argument_parser.parse_args()
-    print(args)
-    data_path = f'./{args.data}'
-    output_path = f'./{args.output}'
-    num_subset = int(args.num_subset)
-    num_processes = int(args.num_processes)
-    
+
     thread_pool = ThreadPoolExecutor(num_processes)
     annotation = pd.read_csv(f'{data_path}/annotations.csv')
     nodules_log = open(nodules_log, 'w')
     nodules_log.write('seriesuid,slice\n')
     
+    if not os.path.exists(f'{output_path}'): os.mkdir(f'{output_path}')
     if not os.path.exists(f'{output_path}/{image_folder}'): os.mkdir(f'{output_path}/{image_folder}')
-    if not os.path.exists(f'{output_path}/{xml_folder}'): os.mkdir(f'{output_path}/{xml_folder}')
-    
-    for i in range(num_subset):
-        print(f'Processing subset{i}')
-        input_files = list(filter(lambda filename: filename.endswith('.mhd'), os.listdir(f'{data_path}/subset{i}')))
-        full_input_files = [f'{data_path}/subset{i}/{file}' for file in input_files]
+    if not os.path.exists(f'{output_path}/{label_folder}'): os.mkdir(f'{output_path}/{label_folder}')
+
+    for folder in os.walk(data_path).__next__()[1]:
+        print(f'Processing folder {folder}')
+        
+        input_files = list(filter(lambda filename: filename.endswith('.mhd'), os.listdir(f'{data_path}/{folder}')))
+        full_input_files = [f'{data_path}/{folder}/{file}' for file in input_files]
         
         # Save all slices
         with tqdm(total=len(full_input_files), desc=f'Extract images') as pbar:
