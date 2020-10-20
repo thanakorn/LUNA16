@@ -15,16 +15,19 @@ label_folder = 'labels'
 database = 'LIDC-IDRI'
 name = 'nodule'
 nodules_log = './nodules_log.csv'
+default_size = 416
 
 argument_parser = argparse.ArgumentParser()
 argument_parser.add_argument('--classes')
 argument_parser.add_argument('--data')
 argument_parser.add_argument('--output')
 argument_parser.add_argument('--num_processes')
+argument_parser.add_argument('--resize')
 
 args = argument_parser.parse_args()
 data_path = args.data
 output_path = args.output
+resize = args.resize if args.resize else default_size
 num_processes = int(args.num_processes)
 
 classes = open(args.classes, 'r').read().split('\n')
@@ -37,6 +40,7 @@ def save_CT_images(ct_filename):
         img_filename = f'{seriesuid}-{s}.jpeg'
         full_filename = f'{output_path}/{image_folder}/{img_filename}'
         img = cv.normalize(ct_img.get_slice(s), None, alpha=0, beta=255, norm_type=cv.NORM_MINMAX)
+        img = cv.resize(img, (resize, resize), interpolation = cv.INTER_CUBIC)
         cv.imwrite(full_filename, img)
         file.write(os.path.abspath(args.output) + '/' + image_folder + '/' + img_filename + '\n')
 
