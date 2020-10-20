@@ -22,8 +22,7 @@ class CTImage:
     
     def get_pxl_localtion(self, xyz_coord):
         xyz_coord = np.array(xyz_coord)
-        # pxl_pos = np.rint((xyz_coord / self.space) - self.origin)
-        pxl_pos = np.rint((xyz_coord - self.origin) / self.space)
+        pxl_pos = np.rint(np.abs(xyz_coord - self.origin) / self.space)
         return int(pxl_pos[0]), int(pxl_pos[1]), int(pxl_pos[2])
     
     def get_slice(self, slice_idx):
