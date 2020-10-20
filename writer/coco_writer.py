@@ -12,6 +12,6 @@ class COCOWriter:
             box_height = float(obj.ymax - obj.ymin) / annotation.height
             x_center = (obj.xmin + (box_width / 2.)) / annotation.width
             y_center = (obj.ymin + (box_height / 2.)) / annotation.height
-            file.write(f'{class_id} {x_center} {y_center} {box_width} {box_height}')
+            file.write(f'{class_id} {x_center} {y_center} {box_width} {box_height}\n')
             
             
