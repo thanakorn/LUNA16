@@ -33,4 +33,4 @@ if __name__=='__main__':
     for f in xml_files: copyfile(f'{xml_src}/{f}', f'{output_folder}/{annotation_folder}/{f}')
     
     f = open(f'{output_folder}/{imgset_folder}/{img_set}.txt', 'w')
-    for img in img_files: f.write(f'{img}\n')
+    for img in img_files: f.write(f'{os.path.splitext(img)[0]}\n')
